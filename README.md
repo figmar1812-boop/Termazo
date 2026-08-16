@@ -1,6 +1,6 @@
 # Termazo — V0.5 Base de datos real (Fase 9)
 
-Home, catálogo, producto, personalizador, carrito y backend, ahora conectados a una base de datos real en PostgreSQL vía Prisma.
+Home, catálogo, producto, personalizador, carrito y backend, ahora conectados a una base de datos real en PostgreSQL vía Prisma.X
 
 ## Cómo conectar tu base de datos (una sola vez)
 
