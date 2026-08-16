@@ -1,0 +1,133 @@
+// Esquema de base de datos de Termazo — PostgreSQL vía Prisma.
+// Refleja la vista de alto nivel del Plan Maestro (sección 4) ya con los
+// campos reales necesarios para que el frontend, el carrito y el backend
+// (Fase 8) puedan funcionar contra datos reales en vez de lib/products.ts.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  nombre      String
+  descripcion String
+  precioBase  Int // en pesos MXN, sin decimales
+  activo      Boolean  @default(true)
+  inventario  Int      @default(999)
+
+  // Zona de grabado en porcentaje del alto/ancho visible del producto
+  zonaTop    Int
+  zonaBottom Int
+  zonaLeft   Int
+  zonaRight  Int
+
+  colores ProductColor[]
+  items   OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductColor {
+  id        String  @id @default(cuid())
+  nombre    String
+  hex       String
+  imagenUrl String?
+
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  productId String
+}
+
+model Font {
+  id         String @id @default(cuid())
+  nombre     String @unique
+  cssFamily  String
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  nombre    String
+  email     String   @unique
+  telefono  String
+  direccion String?
+  ciudad    String?
+  estado    String?
+  cp        String?
+
+  orders    Order[]
+  createdAt DateTime @default(now())
+}
+
+enum EstadoPedido {
+  PENDIENTE_PAGO
+  PAGADO
+  EN_PRODUCCION
+  GRABADO
+  EMPACADO
+  ENVIADO
+  ENTREGADO
+  CANCELADO
+}
+
+model Order {
+  id           String       @id @default(cuid())
+  numeroPedido String       @unique
+  estado       EstadoPedido @default(PENDIENTE_PAGO)
+  subtotal     Int
+  costoEnvio   Int          @default(0)
+  total        Int
+
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+
+  items      OrderItem[]
+  payment    Payment?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderItem {
+  id            String @id @default(cuid())
+  cantidad      Int
+  precioUnitario Int
+
+  // Snapshot de la personalización en el momento de la compra — se guarda
+  // aquí y no solo por referencia, porque el cliente puede cambiar sus
+  // diseños después y el pedido no debe verse afectado retroactivamente.
+  colorNombre   String
+  colorHex      String
+  texto         String
+  fuenteNombre  String
+  posicion      String
+  tamano        Int
+
+  // URL del archivo de producción generado para LightBurn (Fase 14)
+  archivoProduccionUrl String?
+  vistaPreviaUrl        String?
+
+  product   Product @relation(fields: [productId], references: [id])
+  productId String
+
+  order   Order  @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  orderId String
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  pasarela       String // "mercadopago", "stripe", etc.
+  referenciaId   String // id externo de la pasarela
+  estado         String // "approved", "rejected", "pending"
+  montoRecibido  Int
+
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String @unique
+
+  createdAt DateTime @default(now())
+}
