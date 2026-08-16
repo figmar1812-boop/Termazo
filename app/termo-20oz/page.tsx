@@ -8,6 +8,8 @@ import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
+export const dynamic = "force-dynamic";
+
 const SLUG = "termo-20oz";
 
 export const metadata: Metadata = {

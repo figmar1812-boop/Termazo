@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import PedidosTabla from "./PedidosTabla";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminPedidos() {
   const pedidos = await prisma.order.findMany({
     include: { customer: true, items: { include: { product: true } } },

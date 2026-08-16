@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 
+export const dynamic = "force-dynamic";
+
 // GET /api/products
 // Ahora lee de la base de datos real (Fase 9). El frontend consume este
 // endpoint exactamente igual que antes, cuando leía de lib/products.ts.

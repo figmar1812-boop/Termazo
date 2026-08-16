@@ -11,6 +11,8 @@ import Faq from "@/components/Faq";
 import CtaFinalYFooter from "@/components/CtaFinalYFooter";
 import { getAllProductosDb } from "@/lib/db-products";
 
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const termos = await getAllProductosDb();
 

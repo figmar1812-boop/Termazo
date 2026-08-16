@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import CtaFinalYFooter from "@/components/CtaFinalYFooter";
@@ -16,7 +16,7 @@ const ESTADOS_LABEL: Record<string, string> = {
   CANCELADO: "Cancelado",
 };
 
-export default function PedidoConfirmadoPage() {
+function DetallePedido() {
   const params = useSearchParams();
   const numeroPedido = params.get("pedido");
   const [pedido, setPedido] = useState<any>(null);
@@ -107,5 +107,13 @@ export default function PedidoConfirmadoPage() {
       </section>
       <CtaFinalYFooter />
     </main>
+  );
+}
+
+export default function PedidoConfirmadoPage() {
+  return (
+    <Suspense fallback={<p className="pt-32 text-center text-grafito/60">Cargando...</p>}>
+      <DetallePedido />
+    </Suspense>
   );
 }

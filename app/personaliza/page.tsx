@@ -3,6 +3,8 @@ import Personalizador from "@/components/Personalizador";
 import { getAllProductosDb } from "@/lib/db-products";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Personaliza tu termo | Termazo",
   description:

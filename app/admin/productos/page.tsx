@@ -1,6 +1,8 @@
 import { prisma } from "@/lib/db";
 import ProductosTabla from "./ProductosTabla";
 
+export const dynamic = "force-dynamic";
+
 export default async function AdminProductos() {
   const productos = await prisma.product.findMany({
     include: { colores: true },

@@ -4,6 +4,8 @@ import CtaFinalYFooter from "@/components/CtaFinalYFooter";
 import { getAllProductosDb } from "@/lib/db-products";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Termos personalizados con grabado láser | Termazo",
   description:
