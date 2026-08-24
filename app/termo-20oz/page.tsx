@@ -1,5 +1,5 @@
 import Navbar from "@/components/Navbar";
-import ColorSelector from "@/components/ColorSelector";
+import GaleriaProducto from "@/components/GaleriaProducto";
 import CtaFinalYFooter from "@/components/CtaFinalYFooter";
 import ResenasProducto from "@/components/ResenasProducto";
 import FaqProducto from "@/components/FaqProducto";
@@ -8,9 +8,9 @@ import { prisma } from "@/lib/db";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-export const dynamic = "force-dynamic";
-
 const SLUG = "termo-20oz";
+
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Termo 20 oz personalizado con grabado láser | Termazo",
@@ -18,13 +18,10 @@ export const metadata: Metadata = {
     "Personaliza tu Termo 20 oz con tu nombre, frase o logo. Grabado láser real, vista previa antes de comprar.",
 };
 
-// Cuenta compras reales de este producto en los últimos 30 días — dato
-// honesto (no inventado) para reforzar confianza social en la página.
 async function contarComprasRecientes(slug: string) {
   const treintaDiasAtras = new Date();
   treintaDiasAtras.setDate(treintaDiasAtras.getDate() - 30);
-
-  const count = await prisma.orderItem.count({
+  return prisma.orderItem.count({
     where: {
       product: { slug },
       order: {
@@ -33,7 +30,6 @@ async function contarComprasRecientes(slug: string) {
       },
     },
   });
-  return count;
 }
 
 export default async function Termo20oz() {
@@ -48,23 +44,8 @@ export default async function Termo20oz() {
 
       <section className="pt-32 pb-10 px-6 md:px-10">
         <div className="mx-auto max-w-7xl grid md:grid-cols-2 gap-16 items-start">
-          {/* Visual del producto */}
-          <div className="bg-grafito aspect-square flex items-center justify-center sticky top-24">
-            <div
-              className="h-3/5 w-1/4 rounded-[70px_70px_18px_18px] border border-plata/15 flex items-center justify-center"
-              style={{
-                background: `linear-gradient(180deg, ${producto.colores[0].hex}dd, ${producto.colores[0].hex})`,
-              }}
-            >
-              <div className="text-center">
-                <p className="font-display text-sm md:text-base" style={{ color: producto.colores[0].hex === "#1A1A1A" ? "#C4C4C4" : "#1A1A1A" }}>
-                  TU NOMBRE
-                </p>
-              </div>
-            </div>
-          </div>
+          <GaleriaProducto producto={producto} />
 
-          {/* Info del producto */}
           <div>
             <span className="eyebrow text-cobre-dim font-bold mb-4">Termo</span>
             <h1 className="font-display font-medium text-4xl md:text-5xl mb-4">
@@ -80,10 +61,6 @@ export default async function Termo20oz() {
 
             <p className="text-grafito/70 max-w-md mb-8">{producto.detalle}</p>
 
-            <div className="mb-10">
-              <ColorSelector colores={producto.colores} />
-            </div>
-
             <a
               href="/personaliza"
               className="inline-flex items-center gap-3 bg-cobre text-grafito font-bold px-8 py-4 rounded-sm text-sm hover:bg-cobre-dim transition-colors"
@@ -91,7 +68,6 @@ export default async function Termo20oz() {
               Personalizar este termo →
             </a>
 
-            {/* Badge de garantía — refuerza confianza justo junto al CTA */}
             <div className="flex items-center gap-2 mt-4 text-xs text-grafito/60">
               <svg viewBox="0 0 20 20" className="h-4 w-4 fill-cobre-dim shrink-0">
                 <path d="M10 1l7 3v5c0 5-3.5 8.5-7 10-3.5-1.5-7-5-7-10V4l7-3z" />

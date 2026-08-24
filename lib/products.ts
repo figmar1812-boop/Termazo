@@ -1,7 +1,11 @@
-// NOTA: los productos ahora viven en la base de datos real (Fase 9).
+// NOTA: los productos viven en la base de datos real (Fase 9).
 // Ver lib/db-products.ts para las funciones que los consultan vía Prisma.
-// Este archivo conserva solo los tipos y el catálogo de fuentes (que no
-// depende de datos por producto).
+
+export type ColorProducto = {
+  nombre: string;
+  hex: string;
+  imagenUrl?: string; // foto real del termo en ese color (Cloudinary)
+};
 
 export type Termo = {
   slug: string;
@@ -10,7 +14,7 @@ export type Termo = {
   desde: number;
   desc: string;
   detalle: string;
-  colores: { nombre: string; hex: string }[];
+  colores: ColorProducto[];
   zonaGrabado: { top: number; bottom: number; left: number; right: number };
 };
 

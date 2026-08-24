@@ -1,8 +1,3 @@
-// Esquema de base de datos de Termazo — PostgreSQL vía Prisma.
-// Refleja la vista de alto nivel del Plan Maestro (sección 4) ya con los
-// campos reales necesarios para que el frontend, el carrito y el backend
-// (Fase 8) puedan funcionar contra datos reales en vez de lib/products.ts.
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,11 +12,10 @@ model Product {
   slug        String   @unique
   nombre      String
   descripcion String
-  precioBase  Int // en pesos MXN, sin decimales
+  precioBase  Int
   activo      Boolean  @default(true)
   inventario  Int      @default(999)
 
-  // Zona de grabado en porcentaje del alto/ancho visible del producto
   zonaTop    Int
   zonaBottom Int
   zonaLeft   Int
@@ -45,9 +39,9 @@ model ProductColor {
 }
 
 model Font {
-  id         String @id @default(cuid())
-  nombre     String @unique
-  cssFamily  String
+  id        String @id @default(cuid())
+  nombre    String @unique
+  cssFamily String
 }
 
 model Customer {
@@ -86,31 +80,27 @@ model Order {
   customer   Customer @relation(fields: [customerId], references: [id])
   customerId String
 
-  items      OrderItem[]
-  payment    Payment?
+  items   OrderItem[]
+  payment Payment?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
 
 model OrderItem {
-  id            String @id @default(cuid())
-  cantidad      Int
+  id             String @id @default(cuid())
+  cantidad       Int
   precioUnitario Int
 
-  // Snapshot de la personalización en el momento de la compra — se guarda
-  // aquí y no solo por referencia, porque el cliente puede cambiar sus
-  // diseños después y el pedido no debe verse afectado retroactivamente.
-  colorNombre   String
-  colorHex      String
-  texto         String
-  fuenteNombre  String
-  posicion      String
-  tamano        Int
+  colorNombre  String
+  colorHex     String
+  texto        String
+  fuenteNombre String
+  posicion     String
+  tamano       Int
 
-  // URL del archivo de producción generado para LightBurn (Fase 14)
   archivoProduccionUrl String?
-  vistaPreviaUrl        String?
+  vistaPreviaUrl       String?
 
   product   Product @relation(fields: [productId], references: [id])
   productId String
@@ -120,11 +110,11 @@ model OrderItem {
 }
 
 model Payment {
-  id             String   @id @default(cuid())
-  pasarela       String // "mercadopago", "stripe", etc.
-  referenciaId   String // id externo de la pasarela
-  estado         String // "approved", "rejected", "pending"
-  montoRecibido  Int
+  id            String @id @default(cuid())
+  pasarela      String
+  referenciaId  String
+  estado        String
+  montoRecibido Int
 
   order   Order  @relation(fields: [orderId], references: [id])
   orderId String @unique

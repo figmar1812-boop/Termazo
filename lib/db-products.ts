@@ -1,9 +1,6 @@
 import { prisma } from "./db";
 import { Termo } from "./products";
 
-// Convierte el registro de Prisma al mismo tipo `Termo` que ya usaban todos
-// los componentes — así el resto del código no tuvo que cambiar al pasar de
-// datos estáticos a base de datos real.
 function mapProducto(p: any): Termo {
   return {
     slug: p.slug,
@@ -12,7 +9,11 @@ function mapProducto(p: any): Termo {
     desde: p.precioBase,
     desc: p.descripcion,
     detalle: p.descripcion,
-    colores: p.colores.map((c: any) => ({ nombre: c.nombre, hex: c.hex })),
+    colores: p.colores.map((c: any) => ({
+      nombre: c.nombre,
+      hex: c.hex,
+      imagenUrl: c.imagenUrl ?? undefined,
+    })),
     zonaGrabado: { top: p.zonaTop, bottom: p.zonaBottom, left: p.zonaLeft, right: p.zonaRight },
   };
 }
