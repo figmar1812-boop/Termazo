@@ -6,10 +6,12 @@ import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 
 const CLOUD = "wdv1yp1u"; // tu Cloud name de Cloudinary
+// NOTA: en tu cuenta, Cloudinary no incluye el nombre de la carpeta dentro de
+// la URL de descarga (usa "carpetas din\u00e1micas" que son solo organizativas).
+// Por eso la URL va directo al nombre de archivo, sin "termazo/" en medio.
 const base = (archivo: string) =>
-  `https://res.cloudinary.com/${CLOUD}/image/upload/termazo/${archivo}`;
+  `https://res.cloudinary.com/${CLOUD}/image/upload/${archivo}`;
 
-// Paleta compartida por Termo 20oz y Termo 30oz (misma referencia de colores)
 const paleta18 = [
   { nombre: "Teal", hex: "#1282a2", archivo: "teal.png" },
   { nombre: "Morado", hex: "#9575dc", archivo: "morado.png" },
@@ -31,7 +33,6 @@ const paleta18 = [
   { nombre: "Terracota", hex: "#c3615f", archivo: "terracota.png" },
 ];
 
-// Paleta propia del Skinny (de tu segunda foto de referencia)
 const paletaSkinny = [
   { nombre: "Coral", hex: "#d54e72", archivo: "coral.png" },
   { nombre: "Teal oscuro", hex: "#0b2230", archivo: "teal-oscuro.png" },
