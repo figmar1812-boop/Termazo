@@ -1,17 +1,34 @@
-// Carga los productos con sus colores reales (fotos verdaderas del termo,
-// ya subidas a Cloudinary). Se ejecuta con: npx prisma db seed
+// Carga los productos. El Termo 20oz ahora usa 14 FOTOS REALES (no
+// generadas por computadora). El Termo 30oz y el Skinny siguen con su
+// paleta anterior hasta que tengamos también sus fotos reales.
 
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const CLOUD = "wdv1yp1u"; // tu Cloud name de Cloudinary
-// NOTA: en tu cuenta, Cloudinary no incluye el nombre de la carpeta dentro de
-// la URL de descarga (usa "carpetas din\u00e1micas" que son solo organizativas).
-// Por eso la URL va directo al nombre de archivo, sin "termazo/" en medio.
+const CLOUD = "wdv1yp1u";
 const base = (archivo: string) =>
   `https://res.cloudinary.com/${CLOUD}/image/upload/${archivo}`;
 
+// ===== Termo 20oz — fotos reales =====
+const colores20oz = [
+  { nombre: "Amarillo", hex: "#f2e159", archivo: "20oz-amarillo.png" },
+  { nombre: "Azul marino", hex: "#2e3346", archivo: "20oz-azul-marino.png" },
+  { nombre: "Azul rey", hex: "#314f8e", archivo: "20oz-azul-rey.png" },
+  { nombre: "Blanco", hex: "#dcdce6", archivo: "20oz-blanco.png" },
+  { nombre: "Gris", hex: "#75767d", archivo: "20oz-gris.png" },
+  { nombre: "Magenta fuerte", hex: "#a33865", archivo: "20oz-magenta-fuerte.png" },
+  { nombre: "Morado", hex: "#8a69a8", archivo: "20oz-morado.png" },
+  { nombre: "Naranja", hex: "#f57b14", archivo: "20oz-naranja.png" },
+  { nombre: "Negro", hex: "#28272a", archivo: "20oz-negro.png" },
+  { nombre: "Olivo", hex: "#575c4c", archivo: "20oz-olivo.png" },
+  { nombre: "Rojo", hex: "#b32b2a", archivo: "20oz-rojo.png" },
+  { nombre: "Rosa", hex: "#e1a7b2", archivo: "20oz-rosa.png" },
+  { nombre: "Turquesa", hex: "#75c4d1", archivo: "20oz-turquesa.png" },
+  { nombre: "Verde", hex: "#50b53f", archivo: "20oz-verde.png" },
+];
+
+// ===== Termo 30oz y Skinny — paleta anterior (pendiente de fotos reales) =====
 const paleta18 = [
   { nombre: "Teal", hex: "#1282a2", archivo: "teal.png" },
   { nombre: "Morado", hex: "#9575dc", archivo: "morado.png" },
@@ -67,10 +84,10 @@ async function main() {
       zonaLeft: 5,
       zonaRight: 95,
       colores: {
-        create: paleta18.map((c) => ({
+        create: colores20oz.map((c) => ({
           nombre: c.nombre,
           hex: c.hex,
-          imagenUrl: base(`20oz-${c.archivo}`),
+          imagenUrl: base(c.archivo),
         })),
       },
     },
@@ -127,7 +144,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("Seed completado: 3 productos con fotos reales de Cloudinary.");
+  console.log("Seed completado: Termo 20oz con 14 fotos reales, 30oz y Skinny con paleta generada.");
 }
 
 main()
