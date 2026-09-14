@@ -1,6 +1,5 @@
-// Carga los productos. Termo 20oz (14 fotos reales) y Termo 30oz (13 fotos
-// reales) ya usan fotos de verdad. El Skinny sigue con su paleta generada
-// hasta que tengamos también sus fotos reales.
+// Los TRES productos ya usan fotos reales (no generadas por computadora):
+// Termo 20oz (14 colores), Termo 30oz (13 colores), Skinny (13 colores).
 
 import { PrismaClient } from "@prisma/client";
 
@@ -10,7 +9,7 @@ const CLOUD = "wdv1yp1u";
 const base = (archivo: string) =>
   `https://res.cloudinary.com/${CLOUD}/image/upload/${archivo}`;
 
-// ===== Termo 20oz — fotos reales =====
+// ===== Termo 20oz =====
 const colores20oz = [
   { nombre: "Amarillo", hex: "#f2e159", archivo: "20oz-amarillo.png" },
   { nombre: "Azul marino", hex: "#2e3346", archivo: "20oz-azul-marino.png" },
@@ -28,7 +27,7 @@ const colores20oz = [
   { nombre: "Verde", hex: "#50b53f", archivo: "20oz-verde.png" },
 ];
 
-// ===== Termo 30oz — fotos reales =====
+// ===== Termo 30oz =====
 const colores30oz = [
   { nombre: "Amarillo", hex: "#fdef33", archivo: "30oz-amarillo.png" },
   { nombre: "Azul marino", hex: "#2c344c", archivo: "30oz-azul-marino.png" },
@@ -45,25 +44,21 @@ const colores30oz = [
   { nombre: "Verde", hex: "#61c228", archivo: "30oz-verde.png" },
 ];
 
-// ===== Skinny — paleta generada (pendiente de fotos reales) =====
-const paletaSkinny = [
-  { nombre: "Coral", hex: "#d54e72", archivo: "coral.png" },
-  { nombre: "Teal oscuro", hex: "#0b2230", archivo: "teal-oscuro.png" },
-  { nombre: "Lavanda", hex: "#b3b8d2", archivo: "lavanda.png" },
-  { nombre: "Negro azulado", hex: "#090913", archivo: "negro-azulado.png" },
-  { nombre: "Turquesa", hex: "#42acb0", archivo: "turquesa.png" },
-  { nombre: "Azul marino", hex: "#0c1d51", archivo: "azul-marino.png" },
-  { nombre: "Marrón vino", hex: "#521a1a", archivo: "marron-vino.png" },
-  { nombre: "Verde limón", hex: "#a8b60e", archivo: "verde-limon.png" },
-  { nombre: "Rosa", hex: "#d595a9", archivo: "rosa.png" },
-  { nombre: "Rojo", hex: "#a8373d", archivo: "rojo.png" },
-  { nombre: "Olivo oscuro", hex: "#2d321c", archivo: "olivo-oscuro.png" },
-  { nombre: "Naranja", hex: "#e47928", archivo: "naranja.png" },
-  { nombre: "Morado", hex: "#5a3c7d", archivo: "morado.png" },
-  { nombre: "Verde", hex: "#4a8a1a", archivo: "verde.png" },
-  { nombre: "Gris", hex: "#4d4b4c", archivo: "gris.png" },
-  { nombre: "Magenta/morado", hex: "#7f265a", archivo: "magenta-morado.png" },
-  { nombre: "Negro", hex: "#0f0f11", archivo: "negro.png" },
+// ===== Skinny 20oz =====
+const coloresSkinny = [
+  { nombre: "Amarillo", hex: "#fdd81a", archivo: "skinny-amarillo.png" },
+  { nombre: "Azul marino", hex: "#1c2b51", archivo: "skinny-azul-marino.png" },
+  { nombre: "Azul rey", hex: "#264489", archivo: "skinny-azul-rey.png" },
+  { nombre: "Blanco", hex: "#d2d0dc", archivo: "skinny-blanco.png" },
+  { nombre: "Gris", hex: "#7a7c82", archivo: "skinny-gris.png" },
+  { nombre: "Morado", hex: "#975cb2", archivo: "skinny-morado.png" },
+  { nombre: "Naranja", hex: "#fc7311", archivo: "skinny-naranja.png" },
+  { nombre: "Negro", hex: "#262527", archivo: "skinny-negro.png" },
+  { nombre: "Olivo", hex: "#4a4f36", archivo: "skinny-olivo.png" },
+  { nombre: "Rojo", hex: "#c72721", archivo: "skinny-rojo.png" },
+  { nombre: "Rosa", hex: "#f5b9c8", archivo: "skinny-rosa.png" },
+  { nombre: "Turquesa", hex: "#43d3d1", archivo: "skinny-turquesa.png" },
+  { nombre: "Verde", hex: "#5cc935", archivo: "skinny-verde.png" },
 ];
 
 async function main() {
@@ -120,10 +115,10 @@ async function main() {
       zonaLeft: 6,
       zonaRight: 94,
       colores: {
-        create: paletaSkinny.map((c) => ({
+        create: coloresSkinny.map((c) => ({
           nombre: c.nombre,
           hex: c.hex,
-          imagenUrl: base(`skinny-${c.archivo}`),
+          imagenUrl: base(c.archivo),
         })),
       },
     },
@@ -140,7 +135,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("Seed completado: 20oz y 30oz con fotos reales, Skinny con paleta generada.");
+  console.log("Seed completado: los 3 productos con fotos reales (40 colores en total).");
 }
 
 main()
