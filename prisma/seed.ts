@@ -1,6 +1,6 @@
-// Carga los productos. El Termo 20oz ahora usa 14 FOTOS REALES (no
-// generadas por computadora). El Termo 30oz y el Skinny siguen con su
-// paleta anterior hasta que tengamos también sus fotos reales.
+// Carga los productos. Termo 20oz (14 fotos reales) y Termo 30oz (13 fotos
+// reales) ya usan fotos de verdad. El Skinny sigue con su paleta generada
+// hasta que tengamos también sus fotos reales.
 
 import { PrismaClient } from "@prisma/client";
 
@@ -28,28 +28,24 @@ const colores20oz = [
   { nombre: "Verde", hex: "#50b53f", archivo: "20oz-verde.png" },
 ];
 
-// ===== Termo 30oz y Skinny — paleta anterior (pendiente de fotos reales) =====
-const paleta18 = [
-  { nombre: "Teal", hex: "#1282a2", archivo: "teal.png" },
-  { nombre: "Morado", hex: "#9575dc", archivo: "morado.png" },
-  { nombre: "Grafito", hex: "#3f3e46", archivo: "grafito.png" },
-  { nombre: "Rojo", hex: "#fa484b", archivo: "rojo.png" },
-  { nombre: "Olivo", hex: "#74865b", archivo: "olivo.png" },
-  { nombre: "Turquesa", hex: "#3ae0e0", archivo: "turquesa.png" },
-  { nombre: "Gris", hex: "#98aaae", archivo: "gris.png" },
-  { nombre: "Rosa magenta", hex: "#fd658b", archivo: "rosa-magenta.png" },
-  { nombre: "Verde", hex: "#62ce3b", archivo: "verde.png" },
-  { nombre: "Azul rey", hex: "#054dae", archivo: "azul-rey.png" },
-  { nombre: "Plata/acero", hex: "#bebbb1", archivo: "plata-acero.png" },
-  { nombre: "Magenta fuerte", hex: "#de429a", archivo: "magenta-fuerte.png" },
-  { nombre: "Verde limón", hex: "#c9df04", archivo: "verde-limon.png" },
-  { nombre: "Lavanda", hex: "#c9ddf0", archivo: "lavanda.png" },
-  { nombre: "Azul marino", hex: "#29436e", archivo: "azul-marino.png" },
-  { nombre: "Rosa claro", hex: "#f7b3c4", archivo: "rosa-claro.png" },
-  { nombre: "Naranja", hex: "#fd8308", archivo: "naranja.png" },
-  { nombre: "Terracota", hex: "#c3615f", archivo: "terracota.png" },
+// ===== Termo 30oz — fotos reales =====
+const colores30oz = [
+  { nombre: "Amarillo", hex: "#fdef33", archivo: "30oz-amarillo.png" },
+  { nombre: "Azul marino", hex: "#2c344c", archivo: "30oz-azul-marino.png" },
+  { nombre: "Azul rey", hex: "#214392", archivo: "30oz-azul-rey.png" },
+  { nombre: "Blanco", hex: "#ebecef", archivo: "30oz-blanco.png" },
+  { nombre: "Magenta fuerte", hex: "#b5295c", archivo: "30oz-magenta-fuerte.png" },
+  { nombre: "Morado", hex: "#a36bc6", archivo: "30oz-morado.png" },
+  { nombre: "Naranja", hex: "#e24c14", archivo: "30oz-naranja.png" },
+  { nombre: "Negro", hex: "#25262c", archivo: "30oz-negro.png" },
+  { nombre: "Olivo", hex: "#474b26", archivo: "30oz-olivo.png" },
+  { nombre: "Rojo", hex: "#d72f24", archivo: "30oz-rojo.png" },
+  { nombre: "Rosa", hex: "#fda4a3", archivo: "30oz-rosa.png" },
+  { nombre: "Turquesa", hex: "#67deda", archivo: "30oz-turquesa.png" },
+  { nombre: "Verde", hex: "#61c228", archivo: "30oz-verde.png" },
 ];
 
+// ===== Skinny — paleta generada (pendiente de fotos reales) =====
 const paletaSkinny = [
   { nombre: "Coral", hex: "#d54e72", archivo: "coral.png" },
   { nombre: "Teal oscuro", hex: "#0b2230", archivo: "teal-oscuro.png" },
@@ -104,10 +100,10 @@ async function main() {
       zonaLeft: 5,
       zonaRight: 95,
       colores: {
-        create: paleta18.map((c) => ({
+        create: colores30oz.map((c) => ({
           nombre: c.nombre,
           hex: c.hex,
-          imagenUrl: base(`30oz-${c.archivo}`),
+          imagenUrl: base(c.archivo),
         })),
       },
     },
@@ -144,7 +140,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("Seed completado: Termo 20oz con 14 fotos reales, 30oz y Skinny con paleta generada.");
+  console.log("Seed completado: 20oz y 30oz con fotos reales, Skinny con paleta generada.");
 }
 
 main()
