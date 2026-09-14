@@ -1,5 +1,6 @@
-// Los TRES productos ya usan fotos reales (no generadas por computadora):
-// Termo 20oz (14 colores), Termo 30oz (13 colores), Skinny (13 colores).
+// Los TRES productos usan fotos reales. Se agregó "?v=2" a las URLs del
+// negro y verde del Skinny para forzar que Cloudinary sirva la versión
+// nueva (la caché de su red seguía mostrando la vieja con la misma URL).
 
 import { PrismaClient } from "@prisma/client";
 
@@ -53,12 +54,12 @@ const coloresSkinny = [
   { nombre: "Gris", hex: "#7a7c82", archivo: "skinny-gris.png" },
   { nombre: "Morado", hex: "#975cb2", archivo: "skinny-morado.png" },
   { nombre: "Naranja", hex: "#fc7311", archivo: "skinny-naranja.png" },
-  { nombre: "Negro", hex: "#262527", archivo: "skinny-negro.png" },
+  { nombre: "Negro", hex: "#262527", archivo: "skinny-negro.png?v=2" },
   { nombre: "Olivo", hex: "#4a4f36", archivo: "skinny-olivo.png" },
   { nombre: "Rojo", hex: "#c72721", archivo: "skinny-rojo.png" },
   { nombre: "Rosa", hex: "#f5b9c8", archivo: "skinny-rosa.png" },
   { nombre: "Turquesa", hex: "#43d3d1", archivo: "skinny-turquesa.png" },
-  { nombre: "Verde", hex: "#5cc935", archivo: "skinny-verde.png" },
+  { nombre: "Verde", hex: "#5cc935", archivo: "skinny-verde.png?v=2" },
 ];
 
 async function main() {
@@ -135,7 +136,7 @@ async function main() {
     skipDuplicates: true,
   });
 
-  console.log("Seed completado: los 3 productos con fotos reales (40 colores en total).");
+  console.log("Seed completado: caché de negro y verde del Skinny forzada a refrescar.");
 }
 
 main()
