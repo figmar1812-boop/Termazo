@@ -12,7 +12,7 @@ export default function Inspiracion() {
           {ideas.map((i) => (
             <a
               key={i}
-              href="/inspiracion"
+              href="/personaliza"
               className="px-5 py-2.5 border border-grafito/15 rounded-full text-sm hover:border-cobre hover:text-cobre-dim transition-colors"
             >
               {i}

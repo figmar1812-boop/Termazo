@@ -8,7 +8,7 @@ export default function Testimonios() {
   return (
     <section className="px-6 md:px-10 py-24 border-b border-grafito/10">
       <div className="mx-auto max-w-7xl">
-        <span className="eyebrow text-cobre-dim font-bold mb-10">Lo que dicen</span>
+        <span className="eyebrow text-cobre-dim font-bold mb-10 uppercase">Lo que dicen de su Termazo</span>
         <div className="grid md:grid-cols-3 gap-10">
           {testimonios.map((t, i) => (
             <div key={i}>

@@ -34,9 +34,12 @@ export default function CtaFinalYFooter() {
     <>
       <section className="px-6 md:px-10 py-28 bg-grafito text-hueso text-center">
         <span className="eyebrow justify-center text-plata mb-6">Empieza hoy</span>
-        <h2 className="font-display font-medium text-4xl md:text-5xl max-w-xl mx-auto mb-8">
-          ¿Listo para tu Termazo?
+        <h2 className="font-display font-medium text-4xl md:text-5xl max-w-xl mx-auto mb-4 uppercase">
+          ¿Listo para hacerlo tuyo?
         </h2>
+        <p className="text-plata max-w-md mx-auto mb-8">
+          Personaliza tu Termazo y mira cómo quedará antes de comprar.
+        </p>
         <a
           href="/personaliza"
           className="inline-flex items-center gap-3 bg-cobre text-grafito font-bold px-9 py-4 rounded-sm text-sm hover:bg-cobre-dim transition-colors"
