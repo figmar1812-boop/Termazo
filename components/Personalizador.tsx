@@ -12,23 +12,29 @@ const MODOS = [
   { id: "ambos" as ModoPersonalizacion, nombre: "Ajusta texto e imagen" },
 ];
 
-type PosLibre = { x: number; y: number; rot: number }; // x/y en % dentro de la zona de grabado
+const NIVELES_ZOOM = [
+  { valor: 1, etiqueta: "1×" },
+  { valor: 2.2, etiqueta: "🔍 2×" },
+  { valor: 4, etiqueta: "🔎 4×" },
+];
 
+type PosLibre = { x: number; y: number; rot: number };
 const POS_INICIAL: PosLibre = { x: 50, y: 50, rot: 0 };
 
 export default function Personalizador({ termos }: { termos: Termo[] }) {
   const { agregarItem } = useCarrito();
   const [confirmado, setConfirmado] = useState(false);
   const [modo, setModo] = useState<ModoPersonalizacion>("texto");
+  const [zoom, setZoom] = useState(1);
 
   const [productoIdx, setProductoIdx] = useState(0);
   const producto = termos[productoIdx];
 
   const [colorIdx, setColorIdx] = useState(0);
-  const [texto, setTexto] = useState("CHRISTIAN");
+  const [texto, setTexto] = useState("Christian");
   const [fuenteId, setFuenteId] = useState(fuentes[0].id);
-  const [tamanoTexto, setTamanoTexto] = useState(50); // 0-100, tamaño del texto
-  const [tamanoLogo, setTamanoLogo] = useState(50); // 0-100, tamaño del logo
+  const [tamanoTexto, setTamanoTexto] = useState(50);
+  const [tamanoLogo, setTamanoLogo] = useState(50);
 
   const [posTexto, setPosTexto] = useState<PosLibre>(POS_INICIAL);
   const [posLogo, setPosLogo] = useState<PosLibre>(POS_INICIAL);
@@ -45,9 +51,6 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
   const TIPOS_PERMITIDOS = ["image/png", "image/jpeg", "image/svg+xml"];
   const TAMANO_MAX_MB = 5;
 
-  // Arrastre libre — funciona con mouse y con dedo (pointer events unifica ambos).
-  // La posición se guarda como porcentaje dentro de la zona de grabado, así
-  // que funciona igual sin importar el tamaño real del termo en pantalla.
   function iniciarArrastre(elemento: "texto" | "logo") {
     return (e: React.PointerEvent) => {
       e.preventDefault();
@@ -88,11 +91,8 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
     }
   }
 
-  // Convierte la imagen subida en un "stencil" bitonal: separa trazos oscuros
-  // (el logo) del fondo claro, usando un umbral automático basado en el
-  // promedio de luminancia de la imagen. El resultado es un PNG con
-  // transparencia real donde antes no la había — así simula un grabado
-  // láser real (líneas sí/no), no una foto pegada encima del termo.
+  // Convierte el logo subido en un "stencil" bitonal (trazos sí/no) usando
+  // un umbral automático — simula cómo se vería grabado en láser real.
   function vectorizarLogo(dataUrl: string, invertir: boolean): Promise<string> {
     return new Promise((resolve, reject) => {
       const img = new window.Image();
@@ -191,55 +191,72 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
 
   const fuente = fuentes.find((f) => f.id === fuenteId)!;
   const color = producto.colores[colorIdx];
-  const esClaro = color.hex === "#FAFAF8" || color.hex === "#C4C4C4";
-  const colorGrabado = esClaro ? "#1A1A1A" : "#C4C4C4";
 
-  // Tamaño de fuente real limitado dentro de un rango razonable para no salirse de la zona de grabado
-  const fontSizePx = 7 + (tamanoTexto / 100) * 21; // 7px a 28px
-  const logoTamanoPct = 25 + (tamanoLogo / 100) * 60; // 25% a 85% del ancho de la zona
+  const fontSizePx = 7 + (tamanoTexto / 100) * 26;
+  const logoTamanoPct = 15 + (tamanoLogo / 100) * 125;
+
+  const centroZonaX = producto.zonaGrabado.left + (producto.zonaGrabado.right - producto.zonaGrabado.left) / 2;
+  const centroZonaY = producto.zonaGrabado.top + (producto.zonaGrabado.bottom - producto.zonaGrabado.top) / 2;
 
   return (
     <div className="grid md:grid-cols-2 gap-14">
-      {/* Vista previa */}
-      <div className="bg-grafito flex flex-col items-center justify-center sticky top-24 self-start p-5 md:p-10">
-        <p className="text-plata text-xs uppercase tracking-widest mb-4">
-          {modo === "texto" && "Ajustando: texto"}
-          {modo === "logo" && "Ajustando: imagen"}
-          {modo === "ambos" && "Ajustando: texto + imagen — arrastra cada uno por separado"}
-        </p>
-        <div
-          className="relative h-[380px] w-[200px] md:h-[520px] md:w-[280px] rounded-[70px_70px_18px_18px] border border-plata/15 overflow-hidden"
-          style={{ background: `linear-gradient(180deg, ${color.hex}dd, ${color.hex})` }}
-        >
-          {/* Textura sutil de metal cepillado */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              backgroundImage:
-                "repeating-linear-gradient(100deg, rgba(255,255,255,0.05) 0px, rgba(255,255,255,0.05) 1px, transparent 1px, transparent 3px)",
-              mixBlendMode: "overlay",
-            }}
-          />
-          {/* Brillo direccional para dar volumen al termo */}
-          <div
-            className="absolute inset-0 pointer-events-none"
-            style={{
-              background:
-                "linear-gradient(115deg, rgba(255,255,255,0.18) 0%, transparent 25%, transparent 75%, rgba(0,0,0,0.15) 100%)",
-            }}
-          />
+      {/* Vista previa — foto real del producto */}
+      <div className="bg-hueso border border-grafito/10 flex flex-col items-center justify-center sticky top-24 self-start p-6 overflow-hidden">
+        <div className="flex items-center justify-between w-full max-w-[420px] mb-4 relative z-20">
+          <p className="text-grafito/50 text-xs uppercase tracking-widest">
+            {modo === "texto" && "Ajustando: texto"}
+            {modo === "logo" && "Ajustando: imagen"}
+            {modo === "ambos" && "Ajustando: texto + imagen"}
+          </p>
+          <div className="flex gap-1 bg-white border border-grafito/15 rounded-full p-[3px]">
+            {NIVELES_ZOOM.map((n) => (
+              <button
+                key={n.valor}
+                onClick={() => setZoom(n.valor)}
+                title={n.valor === 1 ? "Sin zoom" : "Acercar"}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition-colors ${
+                  zoom === n.valor
+                    ? "bg-cobre text-white"
+                    : "text-grafito/55 hover:text-grafito"
+                }`}
+              >
+                {n.etiqueta}
+              </button>
+            ))}
+          </div>
+        </div>
 
-          {/* Zona de grabado — además de referencia visual, es el área de arrastre real.
-              El ancho se ajusta al producto (cada termo tiene su propia zona real). */}
+        <div
+          className="relative w-full max-w-[420px] aspect-square z-10 transition-transform duration-300"
+          style={{
+            transform: `scale(${zoom})`,
+            transformOrigin: `${centroZonaX}% ${centroZonaY}%`,
+          }}
+        >
+          {color?.imagenUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={color.imagenUrl}
+              alt={`${producto.nombre} — ${color.nombre}`}
+              className="absolute inset-0 w-full h-full object-contain pointer-events-none select-none"
+              draggable={false}
+            />
+          ) : (
+            <div
+              className="absolute inset-0 rounded-[10%]"
+              style={{ background: color?.hex }}
+            />
+          )}
+
+          {/* Zona de grabado real — área de arrastre, calibrada a la foto */}
           <div
             ref={zonaRef}
-            className="absolute border border-dashed touch-none"
+            className="absolute touch-none"
             style={{
               top: `${producto.zonaGrabado.top}%`,
               bottom: `${100 - producto.zonaGrabado.bottom}%`,
               left: `${producto.zonaGrabado.left}%`,
               right: `${100 - producto.zonaGrabado.right}%`,
-              borderColor: esClaro ? "rgba(26,26,26,0.15)" : "rgba(196,196,196,0.2)",
             }}
           >
             {modo !== "logo" && (
@@ -256,19 +273,15 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
                   fontFamily: fuente.cssFamily,
                   fontSize: `${fontSizePx}px`,
                   letterSpacing: "0.02em",
-                  color: colorGrabado,
-                  opacity: 0.94,
-                  textShadow: esClaro
-                    ? "0 1.5px 0 rgba(255,255,255,0.6), 0 -0.5px 0 rgba(0,0,0,0.25)"
-                    : "0 1.5px 0 rgba(255,255,255,0.22), 0 -1px 0 rgba(0,0,0,0.65)",
+                  color: "#E9EBEE",
+                  textShadow:
+                    "0 0 6px rgba(255,255,255,0.55), 0 1px 1px rgba(0,0,0,0.45), 0 -0.5px 0 rgba(255,255,255,0.4)",
                 }}
               >
-                {texto || "TU TEXTO"}
+                {texto || "Tu texto"}
               </div>
             )}
 
-            {/* Logo, si el cliente subió uno — se convierte a una silueta sólida en el
-                color de grabado (plata u oscuro), como se ve un grabado láser real */}
             {modo !== "texto" && logo && (
               <div
                 onPointerDown={iniciarArrastre("logo")}
@@ -279,8 +292,9 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
                   width: `${logoTamanoPct}%`,
                   aspectRatio: "1 / 1",
                   transform: `translate(-50%, -50%) rotate(${posLogo.rot}deg)`,
-                  backgroundColor: colorGrabado,
-                  opacity: 0.92,
+                  backgroundColor: "#E9EBEE",
+                  filter:
+                    "drop-shadow(0 0 4px rgba(255,255,255,0.5)) drop-shadow(0 1px 1px rgba(0,0,0,0.4))",
                   WebkitMaskImage: `url(${logo})`,
                   maskImage: `url(${logo})`,
                   WebkitMaskRepeat: "no-repeat",
@@ -303,7 +317,6 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           Diseña tu termo.
         </h1>
 
-        {/* 0. Modo de personalización */}
         <div className="mb-8">
           <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">
             ¿Qué quieres ajustar?
@@ -325,7 +338,6 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         </div>
 
-        {/* 1. Producto */}
         <div className="mb-8">
           <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Termo</p>
           <div className="flex gap-2 flex-wrap">
@@ -335,6 +347,7 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
                 onClick={() => {
                   setProductoIdx(i);
                   setColorIdx(0);
+                  setZoom(1);
                 }}
                 className={`px-4 py-2 text-sm border rounded-sm transition-colors ${
                   i === productoIdx
@@ -348,15 +361,14 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         </div>
 
-        {/* 2. Color */}
         <div className="mb-8">
           <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">
             Color: <span className="text-grafito font-semibold">{color.nombre}</span>
           </p>
-          <div className="flex gap-3">
+          <div className="flex gap-3 flex-wrap">
             {producto.colores.map((c, i) => (
               <button
-                key={c.hex}
+                key={c.hex + i}
                 onClick={() => setColorIdx(i)}
                 aria-label={c.nombre}
                 className={`h-9 w-9 rounded-full border-2 transition-transform ${
@@ -368,7 +380,6 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         </div>
 
-        {/* 3. Texto */}
         {modo !== "logo" && (
           <div className="mb-8">
             <label className="text-xs uppercase tracking-widest text-grafito/50 mb-3 block">
@@ -386,7 +397,6 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         )}
 
-        {/* 4. Tipografía */}
         {modo !== "logo" && (
           <div className="mb-8">
             <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Tipografía</p>
@@ -409,12 +419,9 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         )}
 
-        {/* 5. Tamaño */}
         {modo !== "logo" && (
           <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">
-              Tamaño del texto
-            </p>
+            <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Tamaño del texto</p>
             <input
               type="range"
               min={0}
@@ -427,9 +434,7 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
         )}
         {modo !== "texto" && logo && (
           <div className="mb-8">
-            <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">
-              Tamaño de la imagen
-            </p>
+            <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Tamaño de la imagen</p>
             <input
               type="range"
               min={0}
@@ -441,68 +446,89 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           </div>
         )}
 
-        {/* 6. Posición — libre, arrastrando directo sobre el cuadro punteado del termo */}
         <div className="mb-10 bg-hueso border border-grafito/10 p-4 rounded-sm">
           <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Posición</p>
           <p className="text-sm text-grafito/60 mb-4">
-            En la vista previa de la izquierda, arrastra el texto o la imagen dentro del recuadro punteado para acomodarlos donde quieras.
+            Arrastra el texto o la imagen directamente sobre la foto del termo para moverlo.
           </p>
-          <div className="flex gap-3 flex-wrap">
-            {modo !== "logo" && (
-              <div className="flex items-center gap-2">
+
+          {modo !== "logo" && (
+            <div className="mb-3 p-3.5 rounded-md bg-cobre/[0.06] border border-cobre/25">
+              <span className="text-[11px] uppercase tracking-widest text-cobre-dim font-bold block mb-2.5">
+                Texto
+              </span>
+              <div className="flex gap-2.5 flex-wrap">
                 <button
                   onClick={() => rotar("texto")}
-                  className="px-3 py-1.5 text-xs border border-grafito/20 rounded-sm hover:border-cobre"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cobre text-white text-sm font-bold shadow-sm hover:-translate-y-px hover:shadow-md transition-all"
                 >
-                  Rotar texto ({posTexto.rot}°)
+                  <span className="text-base leading-none">↻</span> Rotar <b>{posTexto.rot}°</b>
                 </button>
                 <button
                   onClick={() => setPosTexto(POS_INICIAL)}
-                  className="px-3 py-1.5 text-xs text-grafito/50 underline"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-cobre text-cobre-dim text-sm font-bold hover:-translate-y-px transition-all"
                 >
-                  Centrar
+                  <span className="text-base leading-none">⊙</span> Centrar
                 </button>
               </div>
-            )}
-            {modo !== "texto" && logo && (
-              <div className="flex items-center gap-2">
+            </div>
+          )}
+
+          {modo !== "texto" && logo && (
+            <div className="p-3.5 rounded-md bg-cobre/[0.06] border border-cobre/25">
+              <span className="text-[11px] uppercase tracking-widest text-cobre-dim font-bold block mb-2.5">
+                Imagen / Logo
+              </span>
+              <div className="flex gap-2.5 flex-wrap">
                 <button
                   onClick={() => rotar("logo")}
-                  className="px-3 py-1.5 text-xs border border-grafito/20 rounded-sm hover:border-cobre"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-cobre text-white text-sm font-bold shadow-sm hover:-translate-y-px hover:shadow-md transition-all"
                 >
-                  Rotar logo ({posLogo.rot}°)
+                  <span className="text-base leading-none">↻</span> Rotar <b>{posLogo.rot}°</b>
                 </button>
                 <button
                   onClick={() => setPosLogo(POS_INICIAL)}
-                  className="px-3 py-1.5 text-xs text-grafito/50 underline"
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white border border-cobre text-cobre-dim text-sm font-bold hover:-translate-y-px transition-all"
                 >
-                  Centrar
+                  <span className="text-base leading-none">⊙</span> Centrar
                 </button>
               </div>
-            )}
-          </div>
+            </div>
+          )}
         </div>
 
-        {/* 7. Logo */}
         {modo !== "texto" && (
           <div className="mb-10">
             <p className="text-xs uppercase tracking-widest text-grafito/50 mb-3">Logo</p>
+
             <input
               type="file"
+              id="logoInputReal"
               accept=".png,.jpg,.jpeg,.svg"
               onChange={manejarSubidaLogo}
-              className="text-sm text-grafito/70 file:mr-4 file:px-4 file:py-2 file:border file:border-grafito/20 file:rounded-sm file:bg-white file:text-sm file:cursor-pointer hover:file:border-cobre"
+              className="hidden"
             />
+            <label
+              htmlFor="logoInputReal"
+              className="flex items-center gap-4 border-2 border-dashed border-cobre rounded-lg px-5 py-4 cursor-pointer bg-cobre/5 hover:bg-cobre/10 hover:-translate-y-px transition-all"
+            >
+              <div className="shrink-0 w-13 h-13 rounded-full bg-grafito text-cobre flex items-center justify-center font-display text-2xl font-semibold" style={{ width: 52, height: 52 }}>
+                T
+              </div>
+              <div className="flex flex-col gap-0.5 flex-1">
+                <span className="font-display font-bold text-[17px] text-grafito">Sube tu logo</span>
+                <span className="text-[12.5px] text-grafito/55">Arrastra un archivo o haz clic aquí</span>
+              </div>
+              <span className="shrink-0 text-2xl font-bold text-cobre">↑</span>
+            </label>
+
             {procesandoLogo && (
-              <p className="text-xs text-cobre-dim mt-2">Vectorizando logo...</p>
+              <p className="text-xs text-cobre-dim mt-2.5 font-semibold">Vectorizando logo...</p>
             )}
-            {logoError && <p className="text-xs text-red-500 mt-2">{logoError}</p>}
+            {logoError && <p className="text-xs text-red-500 mt-2.5">{logoError}</p>}
             {logo && !procesandoLogo && (
-              <div className="flex gap-4 mt-2">
-                <button
-                  onClick={alternarInversion}
-                  className="text-xs text-grafito/50 underline"
-                >
+              <div className="flex gap-4 mt-2.5">
+                <button onClick={alternarInversion} className="text-xs text-grafito/50 underline">
                   Invertir trazos
                 </button>
                 <button
@@ -544,9 +570,7 @@ export default function Personalizador({ termos }: { termos: Termo[] }) {
           Confirmar diseño y agregar al carrito →
         </button>
         {confirmado && (
-          <p className="text-sm text-cobre-dim mt-3 font-semibold">
-            Agregado al carrito ✓
-          </p>
+          <p className="text-sm text-cobre-dim mt-3 font-semibold">Agregado al carrito ✓</p>
         )}
       </div>
     </div>
